@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knife — Precision Software Engineering</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        obsidian: '#090a0f',
+                        'obsidian-card': '#11131a',
+                        'obsidian-border': '#1e2230',
+                        'neon-teal': '#00f2fe',
+                        'neon-blue': '#4facfe',
+                        'neon-crimson': '#ff2a5f',
+                        'electric-cyan': '#00d2ff'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace']
+                    },
+                    animation: {
+                        'pulse-glow': 'pulseGlow 3s infinite ease-in-out',
+                        'shimmer': 'shimmer 2.5s infinite linear',
+                        'scanline': 'scanline 8s linear infinite'
+                    },
+                    keyframes: {
+                        pulseGlow: {
+                            '0%, 100%': { opacity: '0.4', transform: 'scale(1)' },
+                            '50%': { opacity: '0.8', transform: 'scale(1.05)' }
+                        },
+                        shimmer: {
+                            '0%': { backgroundPosition: '-200% 0' },
+                            '100%': { backgroundPosition: '200% 0' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Google Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #090a0f;
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+        
+        .glass-panel {
+            background: rgba(17, 19, 26, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-panel-hover:hover {
+            border-color: rgba(0, 242, 254, 0.4);
+            box-shadow: 0 0 25px -5px rgba(0, 242, 254, 0.15);
+        }
+
+        .text-gradient {
+            background: linear-gradient(135deg, #ffffff 0%, #a1a1aa 50%, #00f2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .text-gradient-cyan {
+            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #090a0f;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e2230;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00f2fe;
+        }
+
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+    </style>
+</head>
+<body class="relative min-h-screen text-slate-200 antialiased selection:bg-neon-teal selection:text-black">
+
+    <!-- Particle Background Canvas -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Navigation Header -->
+    <header class="fixed top-0 left-0 right-0 z-50 transition-all duration-300" id="main-header">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20 glass-panel rounded-b-2xl px-6 border-t-0 mt-0">
+                <!-- Brand Logo -->
+                <a href="#hero" class="flex items-center gap-3 group">
+                    <div class="w-10 h-10 transition-transform duration-500 group-hover:rotate-12 group-hover:scale-110">
+                        <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-[0_0_10px_rgba(0,242,254,0.5)]">
+                            <path d="M 20 10 L 45 10 L 80 50 L 55 50 Z" fill="url(#nav-grad-1)" />
+                            <path d="M 55 50 L 80 50 L 45 90 L 20 90 Z" fill="url(#nav-grad-2)" opacity="0.8" />
+                            <path d="M 20 10 L 55 50 L 20 90 L 35 50 Z" fill="#ffffff" />
+                            <defs>
+                                <linearGradient id="nav-grad-1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#00f2fe" />
+                                    <stop offset="100%" stop-color="#4facfe" />
+                                </linearGradient>
+                                <linearGradient id="nav-grad-2" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#00d2ff" />
+                                    <stop offset="100%" stop-color="#0052d4" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                    <span class="font-bold text-2xl tracking-wider text-white font-mono">KNIFE<span class="text-neon-teal">.</span></span>
+                </a>
+
+                <!-- Navigation Links -->
+                <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
+                    <a href="#hero" class="hover:text-neon-teal transition-colors">Início</a>
+                    <a href="#projects" class="hover:text-neon-teal transition-colors flex items-center gap-1.5 font-semibold text-neon-teal">
+                        <i class="fa-solid fa-folder-open text-xs"></i> Projetos
+                    </a>
+                    <a href="#services" class="hover:text-neon-teal transition-colors">Serviços</a>
+                    <a href="#logo-showcase" class="hover:text-neon-teal transition-colors">Branding</a>
+                    <a href="#calculator" class="hover:text-neon-teal transition-colors">Estimador</a>
+                    <a href="#contact" class="hover:text-neon-teal transition-colors">Contato</a>
+                </nav>
+
+                <!-- CTA Button & Mobile Toggle -->
+                <div class="flex items-center gap-4">
+                    <a href="#contact" class="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-neon-teal to-neon-blue text-black font-semibold text-sm hover:shadow-[0_0_20px_rgba(0,242,254,0.4)] transition-all duration-300 hover:scale-105">
+                        <i class="fa-solid fa-bolt"></i> Iniciar Projeto
+                    </a>
+                    <button id="mobile-menu-btn" class="md:hidden text-slate-300 hover:text-white text-2xl focus:outline-none" aria-label="Abrir menu">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Drawer -->
+        <div id="mobile-menu" class="hidden md:hidden glass-panel border-t border-slate-800 px-6 py-6 space-y-4 max-w-7xl mx-auto mt-2 rounded-2xl">
+            <a href="#hero" class="block text-slate-300 hover:text-neon-teal py-2"><i class="fa-solid fa-house mr-2"></i> Início</a>
+            <a href="#projects" class="block text-neon-teal font-semibold py-2"><i class="fa-solid fa-folder-open mr-2"></i> Projetos Referência</a>
+            <a href="#services" class="block text-slate-300 hover:text-neon-teal py-2"><i class="fa-solid fa-code mr-2"></i> Serviços</a>
+            <a href="#logo-showcase" class="block text-slate-300 hover:text-neon-teal py-2"><i class="fa-solid fa-pen-nib mr-2"></i> Branding</a>
+            <a href="#calculator" class="block text-slate-300 hover:text-neon-teal py-2"><i class="fa-solid fa-calculator mr-2"></i> Estimativa</a>
+            <a href="#contact" class="block w-full text-center py-3 rounded-xl bg-gradient-to-r from-neon-teal to-neon-blue text-black font-bold mt-4">
+                Solicitar Proposta
+            </a>
+        </div>
+    </header>
+
+    <main class="relative z-10 pt-28 space-y-28">
+
+        <!-- Hero Section -->
+        <section id="hero" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20 text-center relative">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-panel border border-neon-teal/30 text-neon-teal text-xs sm:text-sm font-mono mb-8 animate-pulse">
+                <span class="w-2 h-2 rounded-full bg-neon-teal animate-ping"></span>
+                <span>DESENVOLVIMENTO DE SOFTWARE DE ALTA PRECISÃO</span>
+            </div>
+
+            <h1 class="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight max-w-5xl mx-auto leading-tight mb-8">
+                Engenharia de Software Afiada como uma <span class="text-gradient">Lâmina.</span>
+            </h1>
+
+            <p class="text-slate-400 text-lg sm:text-xl max-w-3xl mx-auto font-normal leading-relaxed mb-10">
+                A <strong class="text-slate-200">Knife</strong> constrói arquiteturas de alta performance, plataformas bancárias, motores de IA e sistemas críticos feitos sob medida para operações de alta escala.
+            </p>
+
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-md mx-auto">
+                <a href="#projects" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-neon-teal to-neon-blue text-black font-bold text-base hover:shadow-[0_0_30px_rgba(0,242,254,0.5)] transition-all hover:-translate-y-0.5 text-center">
+                    Ver Projetos de Referência <i class="fa-solid fa-arrow-down ml-2"></i>
+                </a>
+                <a href="#calculator" class="w-full sm:w-auto px-8 py-4 rounded-xl glass-panel hover:bg-slate-800/60 text-white font-medium text-base border border-slate-700 transition-all text-center">
+                    Simular Projeto
+                </a>
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-20 pt-10 border-t border-slate-800/80">
+                <div class="p-4 glass-panel rounded-xl">
+                    <p class="text-3xl lg:text-4xl font-extrabold font-mono text-neon-teal">99.99%</p>
+                    <p class="text-xs sm:text-sm text-slate-400 mt-1">Uptime Garantido em SLA</p>
+                </div>
+                <div class="p-4 glass-panel rounded-xl">
+                    <p class="text-3xl lg:text-4xl font-extrabold font-mono text-white">10x</p>
+                    <p class="text-xs sm:text-sm text-slate-400 mt-1">Aceleração de Deploy</p>
+                </div>
+                <div class="p-4 glass-panel rounded-xl">
+                    <p class="text-3xl lg:text-4xl font-extrabold font-mono text-neon-teal">50+</p>
+                    <p class="text-xs sm:text-sm text-slate-400 mt-1">Casos de Sucesso Entregues</p>
+                </div>
+                <div class="p-4 glass-panel rounded-xl">
+                    <p class="text-3xl lg:text-4xl font-extrabold font-mono text-white">&lt;25ms</p>
+                    <p class="text-xs sm:text-sm text-slate-400 mt-1">Latência Média Global</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- PORTFOLIO / REFERENCE PROJECTS SECTION -->
+        <section id="projects" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+                <div>
+                    <div class="inline-flex items-center gap-2 text-neon-teal font-mono text-xs uppercase tracking-widest mb-2">
+                        <i class="fa-solid fa-layer-group"></i> Portfólio de Referência
+                    </div>
+                    <h2 class="text-3xl sm:text-5xl font-bold text-white tracking-tight">Projetos Desenvolvidos</h2>
+                    <p class="text-slate-400 text-base mt-2 max-w-xl">
+                        Conheça algumas das soluções de alta complexidade projetadas e entregues pela equipe da Knife.
+                    </p>
+                </div>
+
+                <!-- Filter Category Tabs -->
+                <div class="flex flex-wrap gap-2 glass-panel p-1.5 rounded-2xl border border-slate-800" id="project-filters">
+                    <button onclick="filterProjects('all')" class="filter-btn active px-4 py-2 rounded-xl text-xs font-mono transition-all bg-neon-teal text-black font-bold" data-filter="all">Todos</button>
+                    <button onclick="filterProjects('enterprise')" class="filter-btn px-4 py-2 rounded-xl text-xs font-mono text-slate-400 hover:text-white transition-all" data-filter="enterprise">Corporativo</button>
+                    <button onclick="filterProjects('web')" class="filter-btn px-4 py-2 rounded-xl text-xs font-mono text-slate-400 hover:text-white transition-all" data-filter="web">Web App</button>
+                    <button onclick="filterProjects('mobile')" class="filter-btn px-4 py-2 rounded-xl text-xs font-mono text-slate-400 hover:text-white transition-all" data-filter="mobile">Mobile / IoT</button>
+                    <button onclick="filterProjects('ai')" class="filter-btn px-4 py-2 rounded-xl text-xs font-mono text-slate-400 hover:text-white transition-all" data-filter="ai">IA & Data</button>
+                </div>
+            </div>
+
+            <!-- Project Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="projects-grid">
+                <!-- Project cards dynamically injected via JavaScript -->
+            </div>
+        </section>
+
+        <!-- Project Details Modal Window -->
+        <div id="project-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-md transition-all">
+            <div class="glass-panel w-full max-w-3xl rounded-3xl border border-slate-700 overflow-hidden shadow-2xl relative max-h-[90vh] flex flex-col my-auto">
+                
+                <!-- Modal Header -->
+                <div class="p-6 border-b border-slate-800 flex items-center justify-between bg-slate-900/60">
+                    <div class="flex items-center gap-3">
+                        <div id="modal-icon" class="w-10 h-10 rounded-xl bg-neon-teal/10 border border-neon-teal/30 flex items-center justify-center text-neon-teal">
+                            <i class="fa-solid fa-diagram-project"></i>
+                        </div>
+                        <div>
+                            <h3 id="modal-title" class="text-xl font-bold text-white">Título do Projeto</h3>
+                            <p id="modal-client" class="text-xs font-mono text-slate-400">Cliente • Categoria</p>
+                        </div>
+                    </div>
+                    <button onclick="closeProjectModal()" class="w-10 h-10 rounded-full glass-panel hover:bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition-colors">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="p-6 sm:p-8 overflow-y-auto space-y-6 text-slate-300 text-sm">
+                    
+                    <!-- Banner Visual -->
+                    <div id="modal-banner" class="w-full h-48 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center relative overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-r from-neon-teal/10 to-neon-blue/10"></div>
+                        <i id="modal-banner-icon" class="fa-solid fa-code text-6xl text-slate-700"></i>
+                    </div>
+
+                    <!-- Metrics Grid -->
+                    <div class="grid grid-cols-3 gap-4 p-4 rounded-2xl bg-slate-900/80 border border-slate-800 font-mono text-center">
+                        <div>
+                            <span id="modal-metric-1-val" class="block text-lg font-bold text-neon-teal">--</span>
+                            <span id="modal-metric-1-lbl" class="text-[10px] text-slate-400 uppercase">Métrica 1</span>
+                        </div>
+                        <div>
+                            <span id="modal-metric-2-val" class="block text-lg font-bold text-white">--</span>
+                            <span id="modal-metric-2-lbl" class="text-[10px] text-slate-400 uppercase">Métrica 2</span>
+                        </div>
+                        <div>
+                            <span id="modal-metric-3-val" class="block text-lg font-bold text-neon-teal">--</span>
+                            <span id="modal-metric-3-lbl" class="text-[10px] text-slate-400 uppercase">Métrica 3</span>
+                        </div>
+                    </div>
+
+                    <!-- Challenge & Solution -->
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="text-xs font-mono uppercase text-neon-teal mb-1">O Desafio</h4>
+                            <p id="modal-challenge" class="leading-relaxed text-slate-300">Descrição do desafio enfrentado pelo cliente.</p>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-mono uppercase text-neon-teal mb-1">Solução Knife</h4>
+                            <p id="modal-solution" class="leading-relaxed text-slate-300">Detalhamento da engenharia de software desenvolvida.</p>
+                        </div>
+                    </div>
+
+                    <!-- Tech Stack Badges -->
+                    <div>
+                        <h4 class="text-xs font-mono uppercase text-slate-400 mb-2">Tecnologias Utilizadas</h4>
+                        <div id="modal-tech-stack" class="flex flex-wrap gap-2"></div>
+                    </div>
+
+                </div>
+
+                <!-- Modal Footer CTA -->
+                <div class="p-6 border-t border-slate-800 bg-slate-900/60 flex items-center justify-between">
+                    <span class="text-xs font-mono text-slate-400">Quer algo similar para sua empresa?</span>
+                    <a href="#contact" onclick="closeProjectModal()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-neon-teal to-neon-blue text-black font-bold text-xs hover:shadow-[0_0_15px_rgba(0,242,254,0.4)] transition-all">
+                        Solicitar Projeto Análogo
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Interactive Logo Showcase Section -->
+        <section id="logo-showcase" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="glass-panel rounded-3xl p-6 sm:p-10 border border-slate-800 relative overflow-hidden">
+                <div class="flex flex-col lg:flex-row items-center gap-12">
+                    
+                    <!-- Left Column: Controls & Context -->
+                    <div class="w-full lg:w-1/2 space-y-6">
+                        <div class="inline-flex items-center gap-2 text-neon-teal font-mono text-xs uppercase tracking-widest">
+                            <i class="fa-solid fa-vector-square"></i> Identidade Visual & Branding
+                        </div>
+                        <h2 class="text-3xl sm:text-4xl font-bold text-white">
+                            O Símbolo da <span class="text-gradient-cyan">Knife</span>
+                        </h2>
+                        <p class="text-slate-400 text-sm sm:text-base leading-relaxed">
+                            O nosso logotipo une a geometria afiada de uma lâmina com a estrutura de aberturas de código (<span class="font-mono text-neon-teal">&lt; / &gt;</span>) e a letra 'K'. Representa precisão cirúrgica no desenvolvimento de software.
+                        </p>
+
+                        <!-- Theme Selector for Logo Preview -->
+                        <div class="space-y-3 pt-2">
+                            <label class="text-xs font-mono text-slate-400 uppercase tracking-wider block">Selecione o Tema Visual:</label>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                <button onclick="setLogoTheme('obsidian')" id="btn-theme-obsidian" class="logo-theme-btn active px-3 py-2 rounded-xl glass-panel text-xs font-medium border border-neon-teal text-white flex items-center justify-center gap-2">
+                                    <span class="w-3 h-3 rounded-full bg-black border border-slate-700"></span> Obsidian
+                                </button>
+                                <button onclick="setLogoTheme('cyber')" id="btn-theme-cyber" class="logo-theme-btn px-3 py-2 rounded-xl glass-panel text-xs font-medium border border-slate-800 text-slate-400 hover:text-white flex items-center justify-center gap-2">
+                                    <span class="w-3 h-3 rounded-full bg-cyan-400"></span> Cyberpunk
+                                </button>
+                                <button onclick="setLogoTheme('clean')" id="btn-theme-clean" class="logo-theme-btn px-3 py-2 rounded-xl glass-panel text-xs font-medium border border-slate-800 text-slate-400 hover:text-white flex items-center justify-center gap-2">
+                                    <span class="w-3 h-3 rounded-full bg-slate-100"></span> Clean Light
+                                </button>
+                                <button onclick="setLogoTheme('mono')" id="btn-theme-mono" class="logo-theme-btn px-3 py-2 rounded-xl glass-panel text-xs font-medium border border-slate-800 text-slate-400 hover:text-white flex items-center justify-center gap-2">
+                                    <span class="w-3 h-3 rounded-full bg-zinc-600"></span> Monochrome
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Interactive Toggles -->
+                        <div class="flex flex-wrap gap-4 pt-4">
+                            <button onclick="toggleLogoAnimation()" id="toggle-anim-btn" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-mono text-slate-200 transition-all flex items-center gap-2">
+                                <i class="fa-solid fa-play text-neon-teal"></i> <span id="anim-btn-text">Pausar Pulso SVG</span>
+                            </button>
+                            <button onclick="downloadSVG()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-mono text-slate-200 transition-all flex items-center gap-2">
+                                <i class="fa-solid fa-download text-neon-teal"></i> Exportar SVG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Interactive Canvas Logo Display -->
+                    <div class="w-full lg:w-1/2 flex items-center justify-center">
+                        <div id="logo-preview-box" class="w-full aspect-square max-w-[380px] rounded-2xl transition-all duration-500 flex flex-col items-center justify-center p-8 relative shadow-2xl bg-obsidian border border-slate-800 group cursor-pointer">
+                            
+                            <!-- SVG Render -->
+                            <div class="w-48 h-48 relative transition-transform duration-500 group-hover:scale-105">
+                                <svg id="interactive-knife-logo" class="w-full h-full filter drop-shadow-[0_0_15px_rgba(0,242,254,0.3)] transition-all duration-500" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    
+                                    <circle id="logo-glow-bg" cx="100" cy="100" r="70" fill="url(#glow-gradient)" opacity="0.15" class="animate-pulse" />
+
+                                    <path id="logo-part-1" d="M 40 20 L 90 20 L 160 100 L 110 100 Z" fill="url(#blade-grad-top)" class="transition-all duration-500" />
+                                    <path id="logo-part-2" d="M 110 100 L 160 100 L 90 180 L 40 180 Z" fill="url(#blade-grad-bot)" opacity="0.85" class="transition-all duration-500" />
+                                    <path id="logo-spine" d="M 40 20 L 110 100 L 40 180 L 70 100 Z" fill="#FFFFFF" class="transition-all duration-500" />
+                                    
+                                    <line x1="125" y1="40" x2="165" y2="40" stroke="#00f2fe" stroke-width="4" stroke-linecap="round" id="accent-line-1" />
+                                    <line x1="140" y1="55" x2="175" y2="55" stroke="#00f2fe" stroke-width="4" stroke-linecap="round" opacity="0.6" id="accent-line-2" />
+
+                                    <defs>
+                                        <radialGradient id="glow-gradient" cx="50%" cy="50%" r="50%">
+                                            <stop offset="0%" stop-color="#00f2fe" />
+                                            <stop offset="100%" stop-color="#090a0f" stop-opacity="0" />
+                                        </radialGradient>
+                                        <linearGradient id="blade-grad-top" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" stop-color="#00f2fe" id="grad-stop-1" />
+                                            <stop offset="100%" stop-color="#4facfe" id="grad-stop-2" />
+                                        </linearGradient>
+                                        <linearGradient id="blade-grad-bot" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" stop-color="#00d2ff" id="grad-stop-3" />
+                                            <stop offset="100%" stop-color="#0052d4" id="grad-stop-4" />
+                                        </linearGradient>
+                                    </defs>
+                                </svg>
+                            </div>
+
+                            <div class="mt-6 text-center">
+                                <span id="logo-text-preview" class="font-bold text-2xl tracking-widest text-white font-mono">KNIFE<span class="text-neon-teal">.</span></span>
+                                <p id="logo-subtext-preview" class="text-[10px] font-mono uppercase tracking-widest text-slate-500 mt-1">Software Architecture & Precision</p>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Services Section -->
+        <section id="services" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-xs font-mono text-neon-teal uppercase tracking-widest mb-3">Capacidades de Engenharia</h2>
+                <p class="text-3xl sm:text-5xl font-bold text-white tracking-tight">Soluções Desenvolvidas com Precisão</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="glass-panel glass-panel-hover rounded-2xl p-8 transition-all duration-300 relative group">
+                    <div class="w-12 h-12 rounded-xl bg-neon-teal/10 border border-neon-teal/30 flex items-center justify-center text-neon-teal text-xl mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-laptop-code"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Apps Web & Mobile</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-4">
+                        Aplicações de alto desempenho criadas com React, Next.js, Flutter e WebAssembly para máxima velocidade.
+                    </p>
+                </div>
+
+                <div class="glass-panel glass-panel-hover rounded-2xl p-8 transition-all duration-300 relative group">
+                    <div class="w-12 h-12 rounded-xl bg-neon-blue/10 border border-neon-blue/30 flex items-center justify-center text-neon-blue text-xl mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-brain"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Sistemas de IA & ML</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-4">
+                        Integração de LLMs, pipelines de machine learning e agentes autônomos para automação de processos complexos.
+                    </p>
+                </div>
+
+                <div class="glass-panel glass-panel-hover rounded-2xl p-8 transition-all duration-300 relative group">
+                    <div class="w-12 h-12 rounded-xl bg-neon-teal/10 border border-neon-teal/30 flex items-center justify-center text-neon-teal text-xl mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-server"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Cloud & DevOps</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-4">
+                        Infraestrutura Serverless, Kubernetes, pipelines CI/CD automatizados e observabilidade completa na AWS/GCP.
+                    </p>
+                </div>
+
+                <div class="glass-panel glass-panel-hover rounded-2xl p-8 transition-all duration-300 relative group">
+                    <div class="w-12 h-12 rounded-xl bg-neon-blue/10 border border-neon-blue/30 flex items-center justify-center text-neon-blue text-xl mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-cubes"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">APIs & Microserviços</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-4">
+                        Arquiteturas distribuídas em Go, Rust e Node.js para cargas de trabalho de ultra-baixa latência e concorrência massiva.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Terminal Demo -->
+        <section id="terminal-demo" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="glass-panel rounded-3xl border border-slate-800 overflow-hidden shadow-2xl">
+                <div class="bg-slate-900/90 px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
+                        <span class="w-3 h-3 rounded-full bg-yellow-500 inline-block"></span>
+                        <span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>
+                        <span class="text-xs font-mono text-slate-400 ml-4"><i class="fa-solid fa-terminal mr-2"></i> knife-cli v2.4.0 — precision-build</span>
+                    </div>
+                    <button onclick="runTerminalSimulation()" class="px-3 py-1 rounded-lg bg-neon-teal/20 hover:bg-neon-teal/30 text-neon-teal text-xs font-mono transition-all">
+                        <i class="fa-solid fa-rotate-right mr-1"></i> Re-executar Build
+                    </button>
+                </div>
+
+                <div class="p-6 font-mono text-xs sm:text-sm bg-[#08090d] text-slate-300 min-h-[280px] overflow-x-auto space-y-2" id="terminal-content">
+                    <p class="text-slate-500">// Iniciando análise de compilação da arquitetura Knife...</p>
+                    <p><span class="text-neon-teal">刀 knife</span> compile --target=cloud-enterprise --optimization=O3</p>
+                    <p class="text-emerald-400">[OK] Módulos de IA verificados. Sem vulnerabilidades detectadas.</p>
+                    <p class="text-emerald-400">[OK] Pipeline Microservices: Rust Core inicializado em 4ms.</p>
+                    <p class="text-yellow-400">[BUILD] Otimizando bundlers de baixa latência...</p>
+                    <p class="text-slate-400">-> Latência estimada de resposta HTTP: <span class="text-neon-teal font-bold">12.4ms</span></p>
+                    <p class="text-slate-400">-> Cobertura de Testes Automatizados: <span class="text-neon-teal font-bold">99.8%</span></p>
+                    <p class="text-emerald-400 font-bold">[SUCCESS] Aplicação compilada e pronta para deploy contínuo.</p>
+                    <p class="text-slate-500 flex items-center gap-2 mt-4">
+                        <span class="text-neon-teal font-bold">&gt;</span>
+                        <span class="animate-pulse">_</span>
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Project Scope Estimator Calculator -->
+        <section id="calculator" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="glass-panel rounded-3xl p-6 sm:p-12 border border-slate-800">
+                <div class="max-w-3xl mb-10">
+                    <div class="inline-flex items-center gap-2 text-neon-teal font-mono text-xs uppercase tracking-widest mb-2">
+                        <i class="fa-solid fa-calculator"></i> Estimador Dinâmico
+                    </div>
+                    <h2 class="text-3xl sm:text-4xl font-bold text-white">Simule o Escopo do seu Projeto</h2>
+                    <p class="text-slate-400 text-sm sm:text-base mt-2">
+                        Selecione as variáveis do seu software e obtenha uma estimativa preliminar de prazo e investimento.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Options Column -->
+                    <div class="lg:col-span-2 space-y-6">
+                        
+                        <!-- Scope Type -->
+                        <div>
+                            <label class="block text-xs font-mono text-slate-400 uppercase mb-3">1. Tipo de Solução:</label>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                <button type="button" onclick="selectCalcOption('type', 'web', 15000, 3)" class="calc-btn type-btn active p-4 rounded-xl glass-panel text-left border border-neon-teal" data-type="web">
+                                    <p class="font-bold text-white text-sm">Plataforma Web</p>
+                                    <p class="text-xs text-slate-400 mt-1">SaaS, Dashboards</p>
+                                </button>
+                                <button type="button" onclick="selectCalcOption('type', 'mobile', 18000, 4)" class="calc-btn type-btn p-4 rounded-xl glass-panel text-left border border-slate-800 hover:border-slate-700" data-type="mobile">
+                                    <p class="font-bold text-white text-sm">App Mobile</p>
+                                    <p class="text-xs text-slate-400 mt-1">iOS & Android</p>
+                                </button>
+                                <button type="button" onclick="selectCalcOption('type', 'ai', 25000, 5)" class="calc-btn type-btn p-4 rounded-xl glass-panel text-left border border-slate-800 hover:border-slate-700" data-type="ai">
+                                    <p class="font-bold text-white text-sm">Motor de IA / ML</p>
+                                    <p class="text-xs text-slate-400 mt-1">LLMs, Agentes</p>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Scale Level -->
+                        <div>
+                            <label class="block text-xs font-mono text-slate-400 uppercase mb-3">2. Complexidade & Escala:</label>
+                            <div class="grid grid-cols-3 gap-3">
+                                <button type="button" onclick="selectCalcOption('scale', 'mvp', 1, 1)" class="calc-btn scale-btn active p-3 rounded-xl glass-panel text-center border border-neon-teal" data-scale="mvp">
+                                    <p class="font-bold text-white text-xs sm:text-sm">MVP Ágil</p>
+                                </button>
+                                <button type="button" onclick="selectCalcOption('scale', 'growth', 1.8, 1.5)" class="calc-btn scale-btn p-3 rounded-xl glass-panel text-center border border-slate-800 hover:border-slate-700" data-scale="growth">
+                                    <p class="font-bold text-white text-xs sm:text-sm">Pro / Growth</p>
+                                </button>
+                                <button type="button" onclick="selectCalcOption('scale', 'enterprise', 3, 2.5)" class="calc-btn scale-btn p-3 rounded-xl glass-panel text-center border border-slate-800 hover:border-slate-700" data-scale="enterprise">
+                                    <p class="font-bold text-white text-xs sm:text-sm">Enterprise</p>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Extra Modules Checkboxes -->
+                        <div>
+                            <label class="block text-xs font-mono text-slate-400 uppercase mb-3">3. Módulos Adicionais:</label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <label class="flex items-center gap-3 p-3 rounded-xl glass-panel cursor-pointer hover:bg-slate-800/40">
+                                    <input type="checkbox" onchange="toggleCalcAddon('devops', 5000, 1)" class="rounded bg-slate-900 border-slate-700 text-neon-teal focus:ring-neon-teal">
+                                    <span class="text-xs font-medium text-slate-300">Infraestrutura Cloud & CI/CD (+R$ 5k)</span>
+                                </label>
+                                <label class="flex items-center gap-3 p-3 rounded-xl glass-panel cursor-pointer hover:bg-slate-800/40">
+                                    <input type="checkbox" onchange="toggleCalcAddon('security', 6000, 1)" class="rounded bg-slate-900 border-slate-700 text-neon-teal focus:ring-neon-teal">
+                                    <span class="text-xs font-medium text-slate-300">Auditoria & Pentest de Segurança (+R$ 6k)</span>
+                                </label>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Summary Card -->
+                    <div class="glass-panel p-6 rounded-2xl border border-neon-teal/30 bg-slate-900/50 flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-lg font-bold text-white mb-4 border-b border-slate-800 pb-3">Resumo da Estimativa</h3>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <p class="text-xs text-slate-400 font-mono">Investimento Estimado</p>
+                                    <p class="text-3xl font-extrabold text-neon-teal font-mono mt-1" id="calc-price-display">R$ 15.000</p>
+                                </div>
+
+                                <div>
+                                    <p class="text-xs text-slate-400 font-mono">Tempo de Desenvolvimento</p>
+                                    <p class="text-xl font-bold text-white font-mono mt-1" id="calc-time-display">~ 3 semanas</p>
+                                </div>
+
+                                <div class="p-3 rounded-xl bg-slate-800/60 text-[11px] text-slate-400 leading-relaxed">
+                                    <i class="fa-solid fa-circle-info text-neon-teal mr-1"></i> Estimativa base para planejamento. O escopo definitivo é validado em sessão técnica.
+                                </div>
+                            </div>
+                        </div>
+
+                        <a href="#contact" class="mt-8 w-full block text-center py-3.5 rounded-xl bg-gradient-to-r from-neon-teal to-neon-blue text-black font-bold text-sm hover:shadow-[0_0_20px_rgba(0,242,254,0.4)] transition-all">
+                            Reservar Consultoria Técnica
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+            <div class="glass-panel rounded-3xl p-6 sm:p-12 border border-slate-800">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    
+                    <div>
+                        <span class="text-xs font-mono text-neon-teal uppercase tracking-widest">Contato Direto</span>
+                        <h2 class="text-3xl sm:text-5xl font-bold text-white mt-2 mb-6">Vamos Construir Algo Impressionante.</h2>
+                        <p class="text-slate-400 text-sm sm:text-base leading-relaxed mb-8">
+                            Envie os detalhes do seu projeto ou agende uma reunião com os nossos arquitetos de software.
+                        </p>
+
+                        <div class="space-y-4 font-mono text-xs sm:text-sm">
+                            <div class="flex items-center gap-3 text-slate-300">
+                                <span class="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-neon-teal"><i class="fa-solid fa-envelope"></i></span>
+                                <span>engineering@knife.dev</span>
+                            </div>
+                            <div class="flex items-center gap-3 text-slate-300">
+                                <span class="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-neon-teal"><i class="fa-solid fa-location-dot"></i></span>
+                                <span>São Paulo, SP — Brasil (Atendimento Global)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contact Form -->
+                    <form id="contact-form" onsubmit="handleFormSubmit(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-mono text-slate-400 uppercase mb-2">Seu Nome</label>
+                            <input type="text" required placeholder="ex: Roberto Silva" class="w-full px-4 py-3 rounded-xl bg-slate-900/80 border border-slate-800 text-white placeholder-slate-600 focus:outline-none focus:border-neon-teal text-sm">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-mono text-slate-400 uppercase mb-2">E-mail Corporativo</label>
+                            <input type="email" required placeholder="ex: roberto@empresa.com" class="w-full px-4 py-3 rounded-xl bg-slate-900/80 border border-slate-800 text-white placeholder-slate-600 focus:outline-none focus:border-neon-teal text-sm">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-mono text-slate-400 uppercase mb-2">Resumo do Projeto</label>
+                            <textarea rows="4" required placeholder="Descreva brevemente o objetivo do software..." class="w-full px-4 py-3 rounded-xl bg-slate-900/80 border border-slate-800 text-white placeholder-slate-600 focus:outline-none focus:border-neon-teal text-sm"></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full py-4 rounded-xl bg-gradient-to-r from-neon-teal to-neon-blue text-black font-bold text-sm hover:shadow-[0_0_25px_rgba(0,242,254,0.4)] transition-all">
+                            Enviar Mensagem <i class="fa-solid fa-paper-plane ml-2"></i>
+                        </button>
+
+                        <div id="form-feedback" class="hidden p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono text-center">
+                            ✓ Mensagem recebida! Nossa equipe entrará em contato em até 2 horas.
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800/80 bg-obsidian py-10 relative z-10 text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <span class="font-bold font-mono text-white tracking-widest">KNIFE<span class="text-neon-teal">.</span></span>
+                <span>© 2026 Knife Software Engineering Inc. Todos os direitos reservados.</span>
+            </div>
+            <div class="flex items-center gap-6 font-mono text-slate-400">
+                <a href="#projects" class="hover:text-neon-teal">Portfólio</a>
+                <a href="#" class="hover:text-neon-teal">GitHub</a>
+                <a href="#" class="hover:text-neon-teal">LinkedIn</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        /* ----------------------------------------------------
+           1. Projects / Portfolio Data & Filtering
+        ---------------------------------------------------- */
+        const projectsData = [
+            {
+                id: 'apex-pay',
+                title: 'ApexPay Core Engine',
+                client: 'Fintech Internacional',
+                category: 'enterprise',
+                icon: 'fa-building-columns',
+                summary: 'Motor de pagamentos bancários instantâneos com suporte a microsegundos de liquidação e failover distribuído.',
+                metrics: [
+                    { value: '+450k', label: 'Transações/min' },
+                    { value: '99.999%', label: 'Disponibilidade' },
+                    { value: '<12ms', label: 'Latência de API' }
+                ],
+                challenge: 'O cliente enfrentava gargalos em horários de pico, com perda de transações em arquiteturas monolíticas antigas.',
+                solution: 'Reconstruímos o core financeiro em Rust e Go utilizando mensageria Kafka distribuída e banco de dados distribuído de alta consistência.',
+                tags: ['Rust', 'Go', 'Apache Kafka', 'AWS EKS', 'PostgreSQL']
+            },
+            {
+                id: 'pulse-health',
+                title: 'Pulse Telemedicine App',
+                client: 'Grupo Hospitalar',
+                category: 'mobile',
+                icon: 'fa-heart-pulse',
+                summary: 'Aplicativo médico móvel para vídeoconsultas encriptadas de ponta a ponta e monitoramento de exames por IoT.',
+                metrics: [
+                    { value: '1.2M+', label: 'Pacientes Ativos' },
+                    { value: '4.9★', label: 'Avaliação App Store' },
+                    { value: '100%', label: 'HIPAA Compliant' }
+                ],
+                challenge: 'Alta latência em chamadas de vídeo em conexões 3G/4G e lentidão na sincronização de prontuários em tempo real.',
+                solution: 'Desenvolvimento em Flutter com protocolo WebRTC otimizado para redes instáveis e banco local encriptado com resposta instantânea.',
+                tags: ['Flutter', 'WebRTC', 'Node.js', 'Firebase', 'IoT Devices']
+            },
+            {
+                id: 'synth-ai',
+                title: 'SynthVision Analytics',
+                client: 'Plataforma E-commerce',
+                category: 'ai',
+                icon: 'fa-brain',
+                summary: 'Motor de recomendação hiper-personalizado que prevê intenções de compra com modelos LLM e visão computacional.',
+                metrics: [
+                    { value: '+38%', label: 'Conversão em Vendas' },
+                    { value: '50M', label: 'Recomendações/dia' },
+                    { value: '0.2s', label: 'Inferência de IA' }
+                ],
+                challenge: 'Incapacidade de processar o comportamento visual de navegação em tempo real antes do usuário sair da loja.',
+                solution: 'Pipelines de dados em PyTorch integrados com busca vetorial via Pinecone, entregando predições em milissegundos.',
+                tags: ['Python', 'PyTorch', 'Pinecone', 'FastAPI', 'Docker']
+            },
+            {
+                id: 'cloud-forge',
+                title: 'CloudForge SaaS Platform',
+                client: 'Enterprise Software',
+                category: 'web',
+                icon: 'fa-cloud font-mono',
+                summary: 'Painel completo de orquestração de nuvem e monitoramento FinOps para redução automática de custos AWS/GCP.',
+                metrics: [
+                    { value: '-32%', label: 'Redução de Custos' },
+                    { value: '300+', label: 'Empresas Ativas' },
+                    { value: '100%0', label: 'Automação CI/CD' }
+                ],
+                challenge: 'Falta de visibilidade consolidada de gastos em múltiplos provedores de nuvem para times de engenharia.',
+                solution: 'Plataforma Web SaaS desenvolvida em Next.js e GraphQL com agentes automáticos de desligamento de recursos ociosos.',
+                tags: ['Next.js', 'TypeScript', 'GraphQL', 'Tailwind', 'Python']
+            },
+            {
+                id: 'aero-fleet',
+                title: 'AeroTrack Fleet Monitor',
+                client: 'Logística de Aviação',
+                category: 'mobile',
+                icon: 'fa-plane',
+                summary: 'Sistema de telemetria em tempo real para frotas aéreas com alertas preditivos de manutenção via IoT.',
+                metrics: [
+                    { value: '850', label: 'Aeronaves Rastreadas' },
+                    { value: '0.0s', label: 'Perda de Sinal' },
+                    { value: '-15%', label: 'Tempo em Solo' }
+                ],
+                challenge: 'Sincronização ininterrupta de dados em regiões sem cobertura de dados tradicional.',
+                solution: 'App resiliente offline com sincronização por enlace de satélite e dashboards geográficos de baixa latência.',
+                tags: ['React Native', 'C++', 'AWS IoT', 'MQTTS', 'TimescaleDB']
+            },
+            {
+                id: 'hyper-vault',
+                title: 'HyperVault Security Suite',
+                client: 'Instituição Bancária',
+                category: 'enterprise',
+                icon: 'fa-shield-halved',
+                summary: 'Cofre criptográfico e gerenciador de chaves HSM para transações financeiras de alto valor.',
+                metrics: [
+                    { value: 'Zero', label: 'Brechas de Segurança' },
+                    { value: '256-bit', label: 'AES Encryption' },
+                    { value: 'PCI-DSS', label: 'Certificado Level 1' }
+                ],
+                challenge: 'Necessidade de isolamento total de segredos de produção sem impactar a velocidade das APIs bancárias.',
+                solution: 'Arquitetura Zero-Trust com controle rigoroso de acesso e criptografia via hardware HSM.',
+                tags: ['C++', 'Rust', 'Kubernetes', 'Vault', 'gRPC']
+            }
+        ];
+
+        function renderProjects(filter = 'all') {
+            const grid = document.getElementById('projects-grid');
+            grid.innerHTML = '';
+
+            const filtered = filter === 'all' ? projectsData : projectsData.filter(p => p.category === filter);
+
+            filtered.forEach(p => {
+                const card = document.createElement('div');
+                card.className = "glass-panel glass-panel-hover rounded-3xl p-6 sm:p-8 flex flex-col justify-between border border-slate-800/80 transition-all duration-300 group hover:-translate-y-1";
+                
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="w-12 h-12 rounded-2xl bg-neon-teal/10 border border-neon-teal/30 flex items-center justify-center text-neon-teal text-xl group-hover:scale-110 transition-transform">
+                                <i class="fa-solid ${p.icon}"></i>
+                            </div>
+                            <span class="text-[10px] font-mono px-3 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700 uppercase tracking-wider">${p.client}</span>
+                        </div>
+
+                        <h3 class="text-xl font-bold text-white mb-2 group-hover:text-neon-teal transition-colors">${p.title}</h3>
+                        <p class="text-slate-400 text-xs sm:text-sm leading-relaxed mb-6">${p.summary}</p>
+
+                        <!-- Key Highlights -->
+                        <div class="grid grid-cols-3 gap-2 py-3 px-4 rounded-xl bg-slate-900/80 border border-slate-800/60 mb-6 text-center font-mono">
+                            ${p.metrics.map(m => `
+                                <div>
+                                    <span class="block text-xs sm:text-sm font-bold text-neon-teal">${m.value}</span>
+                                    <span class="text-[9px] text-slate-400 uppercase block truncate">${m.label}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        <!-- Tech Stack Tags -->
+                        <div class="flex flex-wrap gap-1.5 mb-6">
+                            ${p.tags.map(t => `<span class="text-[10px] font-mono px-2.5 py-1 rounded-md bg-slate-800/60 text-slate-300 border border-slate-800">${t}</span>`).join('')}
+                        </div>
+                    </div>
+
+                    <button onclick="openProjectModal('${p.id}')" class="w-full py-3 rounded-xl bg-slate-800/80 hover:bg-neon-teal hover:text-black font-semibold text-xs text-slate-200 transition-all flex items-center justify-center gap-2">
+                        <span>Ver Estudo de Caso</span>
+                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </button>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterProjects(category) {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('bg-neon-teal', 'text-black', 'font-bold');
+                btn.classList.add('text-slate-400');
+            });
+            const activeBtn = document.querySelector(`.filter-btn[data-filter="${category}"]`);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-neon-teal', 'text-black', 'font-bold');
+                activeBtn.classList.remove('text-slate-400');
+            }
+            renderProjects(category);
+        }
+
+        function openProjectModal(id) {
+            const project = projectsData.find(p => p.id === id);
+            if (!project) return;
+
+            document.getElementById('modal-title').textContent = project.title;
+            document.getElementById('modal-client').textContent = `${project.client} • ${project.category.toUpperCase()}`;
+            document.getElementById('modal-challenge').textContent = project.challenge;
+            document.getElementById('modal-solution').textContent = project.solution;
+
+            document.getElementById('modal-metric-1-val').textContent = project.metrics[0].value;
+            document.getElementById('modal-metric-1-lbl').textContent = project.metrics[0].label;
+
+            document.getElementById('modal-metric-2-val').textContent = project.metrics[1].value;
+            document.getElementById('modal-metric-2-lbl').textContent = project.metrics[1].label;
+
+            document.getElementById('modal-metric-3-val').textContent = project.metrics[2].value;
+            document.getElementById('modal-metric-3-lbl').textContent = project.metrics[2].label;
+
+            document.getElementById('modal-banner-icon').className = `fa-solid ${project.icon} text-6xl text-neon-teal/40`;
+
+            const stackContainer = document.getElementById('modal-tech-stack');
+            stackContainer.innerHTML = project.tags.map(t => `
+                <span class="text-xs font-mono px-3 py-1.5 rounded-lg bg-slate-800 text-neon-teal border border-slate-700">${t}</span>
+            `).join('');
+
+            document.getElementById('project-modal').classList.remove('hidden');
+        }
+
+        function closeProjectModal() {
+            document.getElementById('project-modal').classList.add('hidden');
+        }
+
+        /* ----------------------------------------------------
+           2. Particle Background Animation (Canvas)
+        ---------------------------------------------------- */
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 1.5 + 0.5;
+                this.speedX = (Math.random() - 0.5) * 0.4;
+                this.speedY = (Math.random() - 0.5) * 0.4;
+                this.opacity = Math.random() * 0.5 + 0.2;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.y < 0) this.y = canvas.height;
+                if (this.y > canvas.height) this.y = 0;
+            }
+            draw() {
+                ctx.fillStyle = `rgba(0, 242, 254, ${this.opacity})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            const count = Math.floor((canvas.width * canvas.height) / 18000);
+            for (let i = 0; i < count; i++) {
+                particles.push(new Particle());
+            }
+        }
+        initParticles();
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+
+        /* ----------------------------------------------------
+           3. Interactive Logo Theme Controls
+        ---------------------------------------------------- */
+        let isAnimActive = true;
+
+        function setLogoTheme(theme) {
+            const previewBox = document.getElementById('logo-preview-box');
+            const part1 = document.getElementById('logo-part-1');
+            const part2 = document.getElementById('logo-part-2');
+            const spine = document.getElementById('logo-spine');
+            const glow = document.getElementById('logo-glow-bg');
+            const titleText = document.getElementById('logo-text-preview');
+            const subtext = document.getElementById('logo-subtext-preview');
+
+            document.querySelectorAll('.logo-theme-btn').forEach(btn => {
+                btn.classList.remove('border-neon-teal', 'text-white');
+                btn.classList.add('border-slate-800', 'text-slate-400');
+            });
+            document.getElementById(`btn-theme-${theme}`).classList.add('border-neon-teal', 'text-white');
+
+            if (theme === 'obsidian') {
+                previewBox.className = "w-full aspect-square max-w-[380px] rounded-2xl transition-all duration-500 flex flex-col items-center justify-center p-8 relative shadow-2xl bg-obsidian border border-slate-800 group cursor-pointer";
+                part1.setAttribute('fill', 'url(#blade-grad-top)');
+                part2.setAttribute('fill', 'url(#blade-grad-bot)');
+                spine.setAttribute('fill', '#FFFFFF');
+                glow.setAttribute('opacity', '0.15');
+                titleText.className = "font-bold text-2xl tracking-widest text-white font-mono";
+                subtext.className = "text-[10px] font-mono uppercase tracking-widest text-slate-500 mt-1";
+            } else if (theme === 'cyber') {
+                previewBox.className = "w-full aspect-square max-w-[380px] rounded-2xl transition-all duration-500 flex flex-col items-center justify-center p-8 relative shadow-2xl bg-gradient-to-br from-purple-950 via-slate-950 to-cyan-950 border border-cyan-500/40 group cursor-pointer";
+                part1.setAttribute('fill', '#ff007f');
+                part2.setAttribute('fill', '#00f2fe');
+                spine.setAttribute('fill', '#ffe600');
+                glow.setAttribute('opacity', '0.4');
+                titleText.className = "font-bold text-2xl tracking-widest text-cyan-400 font-mono";
+                subtext.className = "text-[10px] font-mono uppercase tracking-widest text-pink-500 mt-1";
+            } else if (theme === 'clean') {
+                previewBox.className = "w-full aspect-square max-w-[380px] rounded-2xl transition-all duration-500 flex flex-col items-center justify-center p-8 relative shadow-2xl bg-slate-100 border border-slate-300 group cursor-pointer";
+                part1.setAttribute('fill', '#0f172a');
+                part2.setAttribute('fill', '#334155');
+                spine.setAttribute('fill', '#0284c7');
+                glow.setAttribute('opacity', '0.05');
+                titleText.className = "font-bold text-2xl tracking-widest text-slate-900 font-mono";
+                subtext.className = "text-[10px] font-mono uppercase tracking-widest text-slate-500 mt-1";
+            } else if (theme === 'mono') {
+                previewBox.className = "w-full aspect-square max-w-[380px] rounded-2xl transition-all duration-500 flex flex-col items-center justify-center p-8 relative shadow-2xl bg-zinc-950 border border-zinc-800 group cursor-pointer";
+                part1.setAttribute('fill', '#e4e4e7');
+                part2.setAttribute('fill', '#71717a');
+                spine.setAttribute('fill', '#ffffff');
+                glow.setAttribute('opacity', '0');
+                titleText.className = "font-bold text-2xl tracking-widest text-zinc-100 font-mono";
+                subtext.className = "text-[10px] font-mono uppercase tracking-widest text-zinc-500 mt-1";
+            }
+        }
+
+        function toggleLogoAnimation() {
+            const glow = document.getElementById('logo-glow-bg');
+            const btnText = document.getElementById('anim-btn-text');
+            
+            if (isAnimActive) {
+                glow.classList.remove('animate-pulse');
+                btnText.textContent = "Ativar Pulso SVG";
+                isAnimActive = false;
+            } else {
+                glow.classList.add('animate-pulse');
+                btnText.textContent = "Pausar Pulso SVG";
+                isAnimActive = true;
+            }
+        }
+
+        function downloadSVG() {
+            const svgElement = document.getElementById('interactive-knife-logo');
+            const serializer = new XMLSerializer();
+            let source = serializer.serializeToString(svgElement);
+
+            if(!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)){
+                source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+            }
+
+            const url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(source);
+            const downloadLink = document.createElement("a");
+            downloadLink.href = url;
+            downloadLink.download = "knife-brand-logo.svg";
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+        }
+
+
+        /* ----------------------------------------------------
+           4. Terminal Build Simulator
+        ---------------------------------------------------- */
+        function runTerminalSimulation() {
+            const container = document.getElementById('terminal-content');
+            container.innerHTML = `<p class="text-slate-500">// Reiniciando ambiente de compilação Knife...</p>`;
+
+            const logs = [
+                { text: '刀 knife compile --target=cloud-enterprise --optimization=O3', class: 'text-neon-teal' },
+                { text: '[OK] Módulos de IA e verificador de estado carregados.', class: 'text-emerald-400' },
+                { text: '[OK] Teste de carga e resiliência: 0 erros.', class: 'text-emerald-400' },
+                { text: '[BUILD] Otimizando bundlers de baixa latência...', class: 'text-yellow-400' },
+                { text: '-> Latência estimada de resposta HTTP: 11.8ms', class: 'text-slate-400' },
+                { text: '[SUCCESS] Projeto verificado com sucesso!', class: 'text-emerald-400 font-bold' }
+            ];
+
+            logs.forEach((log, idx) => {
+                setTimeout(() => {
+                    const p = document.createElement('p');
+                    p.className = log.class;
+                    p.textContent = log.text;
+                    container.appendChild(p);
+                }, (idx + 1) * 400);
+            });
+        }
+
+
+        /* ----------------------------------------------------
+           5. Scope & Cost Estimator Calculator
+        ---------------------------------------------------- */
+        let calcState = {
+            basePrice: 15000,
+            baseWeeks: 3,
+            scaleMultiplierPrice: 1,
+            scaleMultiplierWeeks: 1,
+            addonsPrice: 0,
+            addonsWeeks: 0
+        };
+
+        function updateCalcDisplay() {
+            const totalPrice = (calcState.basePrice * calcState.scaleMultiplierPrice) + calcState.addonsPrice;
+            const totalWeeks = Math.round((calcState.baseWeeks * calcState.scaleMultiplierWeeks) + calcState.addonsWeeks);
+
+            document.getElementById('calc-price-display').textContent = `R$ ${totalPrice.toLocaleString('pt-BR')}`;
+            document.getElementById('calc-time-display').textContent = `~ ${totalWeeks} semana${totalWeeks > 1 ? 's' : ''}`;
+        }
+
+        function selectCalcOption(category, value, priceOrMultiplier, weeksOrMultiplier) {
+            if (category === 'type') {
+                calcState.basePrice = priceOrMultiplier;
+                calcState.baseWeeks = weeksOrMultiplier;
+                
+                document.querySelectorAll('.type-btn').forEach(btn => {
+                    btn.classList.remove('border-neon-teal');
+                    btn.classList.add('border-slate-800');
+                });
+                document.querySelector(`.type-btn[data-type="${value}"]`).classList.add('border-neon-teal');
+            } else if (category === 'scale') {
+                calcState.scaleMultiplierPrice = priceOrMultiplier;
+                calcState.scaleMultiplierWeeks = weeksOrMultiplier;
+
+                document.querySelectorAll('.scale-btn').forEach(btn => {
+                    btn.classList.remove('border-neon-teal');
+                    btn.classList.add('border-slate-800');
+                });
+                document.querySelector(`.scale-btn[data-scale="${value}"]`).classList.add('border-neon-teal');
+            }
+            updateCalcDisplay();
+        }
+
+        let addonTracker = { devops: false, security: false };
+
+        function toggleCalcAddon(addon, price, weeks) {
+            addonTracker[addon] = !addonTracker[addon];
+            
+            calcState.addonsPrice = (addonTracker.devops ? 5000 : 0) + (addonTracker.security ? 6000 : 0);
+            calcState.addonsWeeks = (addonTracker.devops ? 1 : 0) + (addonTracker.security ? 1 : 0);
+
+            updateCalcDisplay();
+        }
+
+
+        /* ----------------------------------------------------
+           6. Mobile Navigation & Form Logic
+        ---------------------------------------------------- */
+        document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        });
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const feedback = document.getElementById('form-feedback');
+            feedback.classList.remove('hidden');
+            e.target.reset();
+            setTimeout(() => {
+                feedback.classList.add('hidden');
+            }, 6000);
+        }
+
+        // Initialize Portfolio on Load
+        window.addEventListener('DOMContentLoaded', () => {
+            renderProjects('all');
+        });
+    </script>
+</body>
+</html>
